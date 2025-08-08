@@ -15,9 +15,24 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// Servir el archivo HTML
+// Servir el archivo HTML principal
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Servir vacantes.html
+app.get('/vacantes.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'vacantes.html'));
+});
+
+// Servir archivos estáticos
+app.get('/img/:filename', (req, res) => {
+    const imagePath = path.join(__dirname, 'img', req.params.filename);
+    if (fs.existsSync(imagePath)) {
+        res.sendFile(imagePath);
+    } else {
+        res.status(404).send('Imagen no encontrada');
+    }
 });
 
 // Endpoint para buscar (versión simplificada para Vercel)
@@ -49,7 +64,7 @@ app.get('/resultados.json', (req, res) => {
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
   } else {
-    res.status(404).send({ error: 'No hay resultados.json' });
+    res.status(404).json({ error: 'No hay resultados.json' });
   }
 });
 
@@ -78,18 +93,14 @@ app.get('/geocode', async (req, res) => {
     }
 });
 
-// Ruta para servir archivos estáticos
-app.get('/vacantes.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'vacantes.html'));
-});
-
-// Ruta para servir la imagen si existe
-app.get('/img/:filename', (req, res) => {
-    const imagePath = path.join(__dirname, 'img', req.params.filename);
-    if (fs.existsSync(imagePath)) {
-        res.sendFile(imagePath);
+// Ruta catch-all para servir archivos estáticos
+app.get('*', (req, res) => {
+    const filePath = path.join(__dirname, req.path);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        res.sendFile(filePath);
     } else {
-        res.status(404).send('Imagen no encontrada');
+        // Si no existe el archivo, redirigir a la página principal
+        res.redirect('/');
     }
 });
 

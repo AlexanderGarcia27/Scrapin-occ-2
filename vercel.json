@@ -4,16 +4,12 @@
     {
       "src": "web-interface/server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "web-interface/**/*",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/",
-      "dest": "/web-interface/index.html"
+      "dest": "/web-interface/server.js"
     },
     {
       "src": "/search",
@@ -28,8 +24,16 @@
       "dest": "/web-interface/server.js"
     },
     {
+      "src": "/vacantes.html",
+      "dest": "/web-interface/server.js"
+    },
+    {
+      "src": "/img/(.*)",
+      "dest": "/web-interface/server.js"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/web-interface/$1"
+      "dest": "/web-interface/server.js"
     }
   ],
   "functions": {

@@ -1,0 +1,13 @@
+node_modules
+.git
+.gitignore
+README.md
+scrape.js
+resultados.json
+resultados.csv
+resultados.xlsx
+resultados.pdf
+*.log
+.env
+.env.local
+.env.production
