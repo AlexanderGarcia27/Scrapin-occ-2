@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { scrapeOCC } from '../scrape.js';
 import fs from 'fs';
 import fetch from 'node-fetch';
 
@@ -10,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -21,7 +20,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Endpoint para buscar
+// Endpoint para buscar (versión simplificada para Vercel)
 app.post('/search', async (req, res) => {
     try {
         const { searchTerm } = req.body;
@@ -32,18 +31,10 @@ app.post('/search', async (req, res) => {
 
         console.log(`Buscando: ${searchTerm}`);
         
-        // Llamar a la función del scraper
-        const results = await scrapeOCC(searchTerm.trim());
-        
-        if (results.length === 0) {
-            return res.json({ success: false, error: 'No se encontraron vacantes' });
-        }
-
-        console.log(`Se encontraron ${results.length} vacantes`);
-        
+        // Para Vercel, no podemos usar Puppeteer, así que devolvemos un mensaje informativo
         res.json({ 
             success: true, 
-            message: `Se encontraron ${results.length} vacantes y se generaron los archivos`
+            message: `Búsqueda "${searchTerm}" recibida. El scraping con Puppeteer no está disponible en Vercel debido a limitaciones del entorno serverless. Para usar el scraping completo, ejecuta el proyecto localmente con 'npm start' en la carpeta web-interface.`
         });
 
     } catch (error) {
@@ -87,6 +78,20 @@ app.get('/geocode', async (req, res) => {
     }
 });
 
+// Ruta para servir archivos estáticos
+app.get('/vacantes.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'vacantes.html'));
+});
+
+// Ruta para servir la imagen si existe
+app.get('/img/:filename', (req, res) => {
+    const imagePath = path.join(__dirname, 'img', req.params.filename);
+    if (fs.existsSync(imagePath)) {
+        res.sendFile(imagePath);
+    } else {
+        res.status(404).send('Imagen no encontrada');
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
